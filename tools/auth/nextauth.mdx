@@ -1,0 +1,81 @@
+---
+title: NextAuth
+description: Auth for Next.js
+---
+
+# NextAuth
+
+**Auth for Next.js**
+
+Authentication for Next.js and Serverless. Supports OAuth, email, credentials, and custom providers with a simple API.
+
+## Key Features
+
+- OAuth & credentials
+- Next.js native
+- Open source
+
+## Setup
+
+<Steps>
+  <Step title="Install NextAuth">
+    <CodeGroup>
+    ```bash npm
+    npm install next-auth
+    ```
+    
+    ```bash yarn
+    yarn add next-auth
+    ```
+    
+    ```bash pnpm
+    pnpm add next-auth
+    ```
+    </CodeGroup>
+  </Step>
+  
+  <Step title="Create API route">
+    Create `app/api/auth/[...nextauth]/route.ts` and configure providers (Google, GitHub, etc.).
+  </Step>
+  
+  <Step title="Add environment variables">
+    Add NEXTAUTH_URL and provider client IDs/secrets to `.env`.
+  </Step>
+  
+  <Step title="Wrap your app">
+    Wrap the app in SessionProvider.
+  </Step>
+</Steps>
+
+## Usage
+
+<Accordion title="Server components">
+  Use `getServerSession()` in server components to access the current session.
+</Accordion>
+
+<Accordion title="Client components">
+  Use `useSession()` in client components to access the current session.
+</Accordion>
+
+<Accordion title="Protect API routes">
+  Protect API routes by checking the session; redirect unauthenticated users as needed.
+</Accordion>
+
+## Hackathon tips
+
+- OAuth providers are quick to add; no custom UI required.
+- Open source and self-hosted—no vendor lock-in, great for open-source projects.
+
+## Resources
+
+<Card title="NextAuth.js quickstart" icon="book" href="https://authjs.dev/getting-started/installation">
+  Official installation and getting started guide
+</Card>
+
+<Card title="Watch: NextAuth beginner setup (community)" icon="play" href="https://www.youtube.com/watch?v=NhBX6cTcTdI">
+  Community tutorial on NextAuth setup
+</Card>
+
+<Card title="Visit NextAuth" icon="link" href="https://next-auth.js.org">
+  Official website
+</Card>

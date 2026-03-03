@@ -1,0 +1,267 @@
+---
+title: Testing
+description: Test setup, commands, coverage requirements, and best practices
+---
+
+## Testing Stack
+
+Tests use:
+- [Vitest](https://vitest.dev/) - Fast unit test framework
+- [React Testing Library](https://testing-library.com/react) - Component testing utilities
+- [happy-dom](https://github.com/capricorn86/happy-dom) - DOM environment (avoids ESM issues with jsdom)
+
+## Test Commands
+
+<CodeGroup>
+```bash Watch mode
+npm run test
+```
+
+```bash Run once
+npm run test:run
+```
+
+```bash Coverage report
+npm run test:coverage
+```
+</CodeGroup>
+
+### Command Details
+
+| Command | Description |
+|---------|-------------|
+| `npm run test` | Run tests in watch mode (re-runs on file changes). |
+| `npm run test:run` | Run the full test suite once. Use this before committing. |
+| `npm run test:coverage` | Run tests and generate a coverage report. Aims for at least 80% (thresholds in Vitest config). Open `coverage/index.html` in a browser to view the report. |
+
+## Configuration
+
+Test configuration lives in `vite.config.ts`:
+
+```typescript
+export default defineConfig(({ mode }) => {
+  return {
+    test: {
+      pool: 'threads',
+      globals: true,
+      environment: 'happy-dom',
+      include: ['**/*.{test,spec}.{ts,tsx}'],
+      setupFiles: ['src/test/setup.ts'],
+      coverage: {
+        provider: 'v8',
+        include: ['shared/**', 'server/**', 'src/**'],
+        exclude: [
+          '**/*.test.{ts,tsx}',
+          '**/*.spec.{ts,tsx}',
+          '**/sections.ts',
+          'src/main.tsx',
+          'src/test/**',
+          'src/index.css',
+        ],
+        thresholds: {
+          lines: 80,
+          functions: 80,
+          branches: 80,
+          statements: 80,
+        },
+      },
+    },
+    // ...
+  }
+})
+```
+
+### Coverage Thresholds
+
+All coverage metrics must meet **80% minimum**:
+- Lines: 80%
+- Functions: 80%
+- Branches: 80%
+- Statements: 80%
+
+### Coverage Scope
+
+<Tabs>
+  <Tab title="Included">
+    ```
+    shared/**
+    server/**
+    src/**
+    ```
+  </Tab>
+  <Tab title="Excluded">
+    ```
+    **/*.test.{ts,tsx}
+    **/*.spec.{ts,tsx}
+    **/sections.ts
+    src/main.tsx
+    src/test/**
+    src/index.css
+    ```
+  </Tab>
+</Tabs>
+
+## Testing Guidelines
+
+### When Adding Code
+
+Write or extend tests for every new or changed behavior:
+- **Unit tests** for shared/server logic
+- **Component tests** for UI
+
+Skip tests only when:
+- The change is trivial (e.g. copy or config)
+- That part of the codebase has no tests and the task is unrelated
+
+### When Removing Code
+
+Remove or update the tests that covered the removed behavior so:
+- The suite stays accurate
+- The test run stays green
+
+## Test Examples
+
+### Component Test Structure
+
+```typescript
+import { render, screen } from '@testing-library/react'
+import { describe, it, expect } from 'vitest'
+import { SectionPanel } from './SectionPanel'
+
+describe('SectionPanel', () => {
+  it('renders section title', () => {
+    render(
+      <SectionPanel
+        section={{
+          id: 'test',
+          title: 'Test Section',
+          tools: []
+        }}
+        isOpen={false}
+        onToggle={() => {}}
+      />
+    )
+
+    expect(screen.getByText('Test Section')).toBeInTheDocument()
+  })
+})
+```
+
+### Shared Logic Test Structure
+
+```typescript
+import { describe, it, expect } from 'vitest'
+import { rankGuideToolsByQuery } from './chatPolicy'
+
+describe('rankGuideToolsByQuery', () => {
+  it('ranks exact name matches highest', () => {
+    const results = rankGuideToolsByQuery('cursor', 5)
+    expect(results[0].name).toBe('Cursor')
+  })
+
+  it('returns fallback when no matches', () => {
+    const results = rankGuideToolsByQuery('nonexistent-tool-xyz', 5)
+    expect(results.length).toBeGreaterThan(0)
+  })
+})
+```
+
+## Running Tests
+
+### Development Workflow
+
+1. **During development**: Run `npm run test` to watch for changes
+2. **Before committing**: Run `npm run test:run` to ensure all tests pass
+3. **Coverage check**: Run `npm run test:coverage` to verify thresholds
+
+### Viewing Coverage Reports
+
+After running `npm run test:coverage`:
+
+1. Open `coverage/index.html` in a browser
+2. Navigate through files to see:
+   - Line coverage
+   - Branch coverage
+   - Function coverage
+   - Uncovered lines highlighted
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Test behavior, not implementation">
+    Focus on testing what the code does, not how it does it.
+
+    ```typescript
+    // Good: Tests behavior
+    expect(screen.getByRole('button')).toHaveTextContent('Submit')
+
+    // Avoid: Tests implementation
+    expect(component.state.isSubmitting).toBe(false)
+    ```
+  </Accordion>
+
+  <Accordion title="Use React Testing Library queries">
+    Prefer queries that mirror how users interact:
+
+    ```typescript
+    // Good: User-centric
+    screen.getByRole('button', { name: 'Submit' })
+    screen.getByLabelText('Email address')
+
+    // Avoid: Implementation details
+    screen.getByTestId('submit-button')
+    ```
+  </Accordion>
+
+  <Accordion title="Keep tests isolated">
+    Each test should be independent:
+
+    ```typescript
+    // Good: Each test sets up its own state
+    describe('ChatPanel', () => {
+      it('test A', () => {
+        const messages = [{ role: 'user', content: 'Hello' }]
+        render(<ChatPanel messages={messages} />)
+        // ...
+      })
+
+      it('test B', () => {
+        const messages = [{ role: 'assistant', content: 'Hi!' }]
+        render(<ChatPanel messages={messages} />)
+        // ...
+      })
+    })
+    ```
+  </Accordion>
+
+  <Accordion title="Test edge cases">
+    Cover:
+    - Empty states
+    - Error conditions
+    - Boundary values
+    - Async operations
+
+    ```typescript
+    describe('rankGuideToolsByQuery', () => {
+      it('handles empty query', () => {
+        const results = rankGuideToolsByQuery('', 5)
+        expect(results.length).toBeGreaterThan(0)
+      })
+
+      it('handles no matches', () => {
+        const results = rankGuideToolsByQuery('xyz123', 5)
+        expect(results.length).toBeGreaterThan(0)
+      })
+    })
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Continuous Integration
+
+Tests run automatically in CI:
+- On every pull request
+- Before merge to main
+- Coverage reports uploaded to CI
+
+Failing tests or coverage below thresholds will block merges.

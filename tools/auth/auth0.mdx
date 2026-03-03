@@ -1,0 +1,73 @@
+---
+title: Auth0
+description: Identity platform
+---
+
+# Auth0
+
+**Identity platform**
+
+Secure access for everyone. Add authentication and authorization to your apps with social logins, SSO, and MFA.
+
+## Key Features
+
+- Social & enterprise login
+- SSO & MFA
+- Universal Login
+
+## Setup
+
+<Steps>
+  <Step title="Create a tenant">
+    Create a tenant at [auth0.com](https://auth0.com), add an Application (SPA or Regular Web), configure callback URLs.
+  </Step>
+  
+  <Step title="Install SDK">
+    <CodeGroup>
+    ```bash npm
+    npm install @auth0/auth0-react
+    ```
+    
+    ```bash yarn
+    yarn add @auth0/auth0-react
+    ```
+    
+    ```bash pnpm
+    pnpm add @auth0/auth0-react
+    ```
+    </CodeGroup>
+  </Step>
+  
+  <Step title="Configure the SDK">
+    Use Auth0 React SDK or Next.js SDK for minimal setup; Universal Login handles the UI.
+  </Step>
+</Steps>
+
+## Social & features
+
+<Accordion title="Enable social providers">
+  Enable Google, GitHub, etc. in the Dashboard → Authentication → Social.
+</Accordion>
+
+<Accordion title="MFA and rules">
+  MFA and rules are available for production; skip for hackathon MVPs unless needed.
+</Accordion>
+
+## Hackathon tips
+
+- Free tier includes 7,000 active users; enough for demos and judging.
+- Use the hosted login page to avoid building your own UI—focus on your app.
+
+## Resources
+
+<Card title="Auth0 quickstart" icon="book" href="https://auth0.com/docs/quickstart">
+  Official quickstart documentation
+</Card>
+
+<Card title="Watch: Auth0 official React quickstart playlist" icon="play" href="https://www.youtube.com/playlist?list=PLZ14qQz3cfJL6aoKZ_Ly7jiYrwi9ihviW">
+  Official React quickstart video series
+</Card>
+
+<Card title="Visit Auth0" icon="link" href="https://auth0.com">
+  Official website
+</Card>

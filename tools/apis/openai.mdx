@@ -1,0 +1,89 @@
+---
+title: 'OpenAI API'
+description: 'AI models for your app'
+---
+
+# OpenAI API
+
+Access GPT-4 and other models for chat, completions, and embeddings to build AI-powered features.
+
+## Key Features
+
+- GPT-4 access
+- Embeddings
+- Fine-tuning
+
+## Setup
+
+<Steps>
+  <Step title="Create an API key">
+    Go to [platform.openai.com](https://platform.openai.com) and create an API key from your account dashboard.
+  </Step>
+  
+  <Step title="Store securely">
+    Store your API key in environment variables (e.g. `OPENAI_API_KEY`)—never commit it to version control.
+    
+    ```bash
+    export OPENAI_API_KEY="your-api-key-here"
+    ```
+  </Step>
+  
+  <Step title="Install SDK">
+    Install the OpenAI SDK for your preferred language:
+    
+    ```bash
+    npm install openai
+    ```
+  </Step>
+  
+  <Step title="Make your first request">
+    Use the Chat Completions API for conversational AI:
+    
+    ```javascript
+    import OpenAI from 'openai';
+    
+    const openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
+    
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        { role: "system", content: "You are a helpful assistant." },
+        { role: "user", content: "Hello!" }
+      ],
+    });
+    
+    console.log(completion.choices[0].message.content);
+    ```
+  </Step>
+</Steps>
+
+## Features & Best Practices
+
+<Accordion title="Setup">
+  - Create an API key at platform.openai.com; store it in env vars (e.g. OPENAI_API_KEY)—never commit it.
+  - Use the Chat Completions API for conversational AI; Structured Outputs for reliable JSON.
+</Accordion>
+
+<Accordion title="Models & usage">
+  - `gpt-4o` is fast and capable for most use cases; `gpt-4o-mini` is cheaper for high-volume tasks.
+  - Embeddings (`text-embedding-3-small`) for search, RAG, and similarity—key for hackathon demos.
+</Accordion>
+
+## Hackathon Tips
+
+<Accordion title="Quick tips for hackathons">
+  - Free tier credits are limited; monitor usage and switch to mini for non-critical calls.
+  - Use system prompts to define behavior; few-shot examples improve consistency for demos.
+</Accordion>
+
+## Resources
+
+<Card title="OpenAI API Quickstart" icon="book" href="https://platform.openai.com/docs/quickstart">
+  Official quickstart guide for the OpenAI API
+</Card>
+
+<Card title="Watch: OpenAI Responses API intro" icon="play" href="https://www.youtube.com/watch?v=S2lUjCT0UXY">
+  Community tutorial on using the OpenAI API
+</Card>

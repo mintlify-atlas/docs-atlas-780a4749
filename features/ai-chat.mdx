@@ -1,0 +1,241 @@
+---
+title: AI Chat Assistant
+description: Get personalized help finding tools, comparing options, and getting hackathon tips with the built-in AI assistant
+---
+
+The AI Hackathon Guide includes an intelligent chat assistant that helps you discover tools, compare options, and get quick tips for building AI applications during hackathons.
+
+## Overview
+
+The chat assistant is powered by OpenAI's GPT models and provides:
+
+- Tool discovery and recommendations from the curated guide
+- Side-by-side comparisons (e.g., "Compare Cursor and Replit")
+- Quick answers about specific tools and their use cases
+- General hackathon tips and best practices
+
+The assistant uses a concise, actionable tone designed for fast-paced hackathon environments.
+
+## How It Works
+
+The chat implementation spans three layers:
+
+### Architecture
+
+- **Frontend** (`src/components/ChatPanel.tsx`) - React modal with markdown rendering
+- **Shared Logic** (`shared/chatPolicy.ts`) - Message handling, OpenAI API calls, and tool ranking
+- **Backend** (`server/chat.ts`) - Vercel serverless function endpoint
+
+The chat uses a shared module pattern where `chatPolicy.ts` contains all business logic, ensuring identical behavior in both development (via Vite middleware) and production (via serverless function).
+
+### Chat Flow
+
+1. User sends a message through the chat UI
+2. `ChatPanel` posts to `/api/chat` with message history
+3. Backend validates messages and sanitizes input
+4. System prompt is constructed based on mode and context
+5. OpenAI API is called with conversation history
+6. Response is returned and rendered as markdown
+
+## Using the Chat
+
+### Opening the Chat
+
+Click the chat icon in the sidebar or use any "Ask AI" button throughout the guide. The chat opens as a modal overlay.
+
+### Example Queries
+
+<CodeGroup>
+```text Tool Comparison
+Compare Cursor and Replit for hackathon development
+```
+
+```text Tool Discovery
+What's the best database for a real-time chat app?
+```
+
+```text Quick Tips
+How do I deploy a Next.js app quickly?
+```
+</CodeGroup>
+
+### Chat Features
+
+- **Markdown Support** - Responses include formatting, lists, and links
+- **Multi-turn Conversations** - Context is maintained across messages
+- **Auto-scroll** - Automatically scrolls to new messages
+- **Keyboard Support** - Press Enter to send, Shift+Enter for new line
+
+## Setup Instructions
+
+<Steps>
+  <Step title="Get an OpenAI API Key">
+    Create an API key at [platform.openai.com/api-keys](https://platform.openai.com/api-keys)
+  </Step>
+  
+  <Step title="Configure Environment Variable">
+    For local development, copy `.env.example` to `.env` and add your key:
+    
+    ```bash
+    OPENAI_API_KEY="your_api_key_here"
+    ```
+    
+    Alternatively, export it in your shell:
+    
+    ```bash
+    export OPENAI_API_KEY="your_api_key_here"
+    ```
+  </Step>
+  
+  <Step title="Start the Development Server">
+    Run the dev server to enable the chat API:
+    
+    ```bash
+    npm run dev
+    ```
+  </Step>
+  
+  <Step title="Test the Chat">
+    Open the application and click the chat icon in the sidebar. Try asking: "What tools do you recommend for authentication?"
+  </Step>
+</Steps>
+
+<Note>
+  The chat requires `OPENAI_API_KEY` to be configured. Without it, you'll see an error: "OPENAI_API_KEY is not configured".
+</Note>
+
+## Production Deployment
+
+When deploying to Vercel:
+
+<Steps>
+  <Step title="Set Environment Variable">
+    Go to your Vercel project settings:
+    
+    **Project Settings → Environment Variables**
+    
+    Add `OPENAI_API_KEY` with your API key as the value.
+  </Step>
+  
+  <Step title="Deploy">
+    Deploy your project. The serverless function at `api/chat.js` will automatically use the environment variable.
+  </Step>
+</Steps>
+
+<Note>
+  Make sure to set the environment variable for all environments (Production, Preview, Development) where you want the chat to work.
+</Note>
+
+## Implementation Details
+
+### Message Validation
+
+All messages go through sanitization (`shared/chatPolicy.ts:231-244`):
+
+```typescript
+function sanitizeMessages(messages: ChatMessage[]): { role: 'user' | 'assistant'; content: string }[] {
+  return messages
+    .filter((message) => message && typeof message.content === 'string')
+    .map((message) => ({ role: message.role, content: message.content.trim() }))
+    .filter((message) => Boolean(message.content))
+    .filter(
+      (message): message is { role: 'user' | 'assistant'; content: string } => 
+        message.role === 'user' || message.role === 'assistant'
+    )
+}
+```
+
+This ensures:
+- Only valid message objects are processed
+- Content is properly trimmed
+- Empty messages are filtered out
+- Only 'user' and 'assistant' roles are allowed
+
+### System Prompt
+
+The default system prompt (`shared/chatPolicy.ts:70-71`) is:
+
+```typescript
+const DEFAULT_SYSTEM_PROMPT = 
+  'You are an assistant for the AI Hackathon Guide. Help users find tools, compare options (e.g. Cursor vs Replit), and get quick tips for building AI apps during hackathons. Be concise and actionable.'
+```
+
+### Model Selection
+
+The chat uses different models based on the mode:
+
+- **Default mode**: `gpt-5.2` for general questions
+- **Suggest-stack mode**: `gpt-5.2` with JSON response format
+
+### Tool Context
+
+You can provide tool-specific context when opening the chat (`src/components/ChatPanel.tsx:16`):
+
+```typescript
+toolContext?: { 
+  toolId: string; 
+  toolName: string; 
+  toolDescription: string; 
+}
+```
+
+When context is provided, the system prompt becomes:
+
+```typescript
+`The user is asking about ${toolName}. Use this description: ${toolDescription}. Answer their question concisely.`
+```
+
+## Error Handling
+
+The chat handles several error scenarios:
+
+- **Missing API Key**: Returns 500 with "OPENAI_API_KEY is not configured"
+- **Invalid Messages**: Returns 400 with "messages array is required" or "must contain user/assistant messages"
+- **OpenAI API Errors**: Returns the API error status and message
+- **Network Errors**: Shows "Network error. Please try again." in the UI
+
+## API Endpoint
+
+### Request Format
+
+```typescript
+POST /api/chat
+Content-Type: application/json
+
+{
+  "messages": [
+    { "role": "user", "content": "What's the best auth tool?" }
+  ],
+  "mode": "default", // or "suggest-stack"
+  "context": { // optional
+    "toolId": "clerk",
+    "toolName": "Clerk",
+    "toolDescription": "Authentication and user management"
+  }
+}
+```
+
+### Response Format
+
+```json
+{
+  "id": "chatcmpl-...",
+  "object": "chat.completion",
+  "created": 1234567890,
+  "model": "gpt-5.2",
+  "choices": [
+    {
+      "index": 0,
+      "finish_reason": "stop",
+      "message": {
+        "role": "assistant",
+        "content": "For authentication, I recommend..."
+      }
+    }
+  ]
+}
+```
+
+## Related
+
+- [Tech Stack Recommendations](/features/tech-stack-recommendations) - Learn about the suggest-stack mode

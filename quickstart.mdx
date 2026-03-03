@@ -1,80 +1,373 @@
 ---
-title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+title: Quick Start Guide
+description: Get the AI Hackathon Guide running locally in minutes
 ---
 
-## Get started in three steps
+## Get Started in 3 Steps
 
-Get your documentation site running locally and make your first customization.
+This guide will help you set up the AI Hackathon Guide locally and start using the AI chat assistant to find the best tools for your hackathon project.
 
-### Step 1: Set up your local environment
+<Steps>
+  <Step title="Clone and Install">
+    Clone the repository and install dependencies:
+
+    ```bash
+    git clone https://github.com/ayomidecole/AI-Hackathon-Guide.git
+    cd AI-Hackathon-Guide
+    npm install
+    ```
+
+    <Note>
+    This project uses npm as the package manager. Make sure you have Node.js 18+ installed.
+    </Note>
+  </Step>
+
+  <Step title="Configure OpenAI API">
+    The AI chat assistant requires an OpenAI API key. Get yours at [platform.openai.com/api-keys](https://platform.openai.com/api-keys).
+
+    <Tabs>
+      <Tab title="Environment File">
+        Copy the example environment file and add your API key:
+
+        ```bash
+        cp .env.example .env
+        ```
+
+        Then edit `.env` and add:
+
+        ```bash
+        OPENAI_API_KEY="your_api_key_here"
+        ```
+      </Tab>
+      <Tab title="Export Variable">
+        Alternatively, export the key directly in your terminal:
+
+        ```bash
+        export OPENAI_API_KEY="your_api_key_here"
+        ```
+
+        <Warning>
+        This method only persists for the current terminal session. You'll need to export again if you close the terminal.
+        </Warning>
+      </Tab>
+    </Tabs>
+
+    <Note>
+    Never commit your `.env` file or API keys to version control. The `.env` file is already in `.gitignore`.
+    </Note>
+  </Step>
+
+  <Step title="Run the Development Server">
+    Start the Vite dev server:
+
+    ```bash
+    npm run dev
+    ```
+
+    The app will be available at `http://localhost:5173`. The dev server includes:
+
+    - Hot module replacement for instant updates
+    - API middleware at `/api/chat` for the AI assistant
+    - TypeScript type checking
+  </Step>
+</Steps>
+
+## Using the AI Chat Assistant
+
+Once the dev server is running, you can access the AI chat assistant from the sidebar:
 
 <AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
-    
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
+  <Accordion title="General Q&A Mode" icon="message-question">
+    Ask general questions about tools, frameworks, or hackathon strategies:
+
+    **Example questions:**
+    - "What's the difference between Clerk and Auth0?"
+    - "How do I add realtime features to my app?"
+    - "Which deployment platform should I use for Next.js?"
+
+    The assistant uses `gpt-4o-mini` for fast, cost-effective responses.
   </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
-    
-    <Tip>Your preview updates automatically as you edit files.</Tip>
+
+  <Accordion title="Stack Suggestion Mode" icon="layer-group">
+    Click "Suggest a stack" to get personalized tech stack recommendations.
+
+    The assistant will:
+    1. Ask clarifying questions about your project (frontend framework, features needed, etc.)
+    2. Analyze the available tools in the guide
+    3. Return a complete stack recommendation with explanations
+
+    This mode uses `gpt-4o` with structured JSON output for reliable recommendations.
   </Accordion>
 </AccordionGroup>
 
-### Step 2: Deploy your changes
+## Available Commands
 
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
-    
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
+Here are all the commands you'll need during development:
 
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
+<CodeGroup>
 
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
+```bash Development
+npm run dev
+```
 
-### Step 3: Go live
+```bash Build
+npm run build
+```
 
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
+```bash Preview Production Build
+npm run preview
+```
 
-## Next steps
+```bash Lint
+npm run lint
+```
 
-Now that you have your docs running, explore these key features:
+```bash Test (Watch Mode)
+npm run test
+```
 
-<CardGroup cols={2}>
+```bash Test (Run Once)
+npm run test:run
+```
 
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
+```bash Test Coverage
+npm run test:coverage
+```
 
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
+```bash Build API Only
+npm run build:api
+```
 
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
+</CodeGroup>
 
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
+### Command Details
 
-</CardGroup>
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Starts Vite dev server with HMR and API middleware at `/api/chat` |
+| `npm run build` | Full production build: TypeScript check → Vite build → esbuild API bundle |
+| `npm run build:api` | Builds only the serverless chat function (`server/chat.ts` → `api/chat.js`) |
+| `npm run lint` | Runs ESLint on all TypeScript files |
+| `npm run preview` | Previews the production build locally |
+| `npm run test` | Runs Vitest in watch mode (auto-reruns on file changes) |
+| `npm run test:run` | Runs the full test suite once (use before committing) |
+| `npm run test:coverage` | Generates coverage report (opens `coverage/index.html` in browser) |
+
+## Testing Your Setup
+
+Verify everything is working correctly:
+
+<Steps>
+  <Step title="Check the Homepage">
+    Navigate to `http://localhost:5173` and verify:
+
+    - Tool sections load (Development Tools, Databases, Auth, etc.)
+    - Tool cards are visible and expandable
+    - Theme toggle works (dark/light mode)
+  </Step>
+
+  <Step title="Test the Chat Assistant">
+    Open the chat panel from the sidebar and:
+
+    1. Send a simple question like "What is Cursor?"
+    2. Verify you get a response (if you see an error, check your API key)
+    3. Try the "Suggest a stack" button
+  </Step>
+
+  <Step title="Run the Test Suite">
+    Ensure all tests pass:
+
+    ```bash
+    npm run test:run
+    ```
+
+    The project uses Vitest with React Testing Library and happy-dom.
+  </Step>
+</Steps>
+
+## Deploying to Production
+
+The guide is optimized for Vercel deployment:
+
+<Steps>
+  <Step title="Push to GitHub">
+    Ensure your code is committed and pushed to a GitHub repository.
+  </Step>
+
+  <Step title="Import to Vercel">
+    1. Go to [vercel.com/new](https://vercel.com/new)
+    2. Import your GitHub repository
+    3. Vercel will auto-detect the Vite configuration
+  </Step>
+
+  <Step title="Add Environment Variables">
+    In your Vercel project settings:
+
+    1. Navigate to **Project Settings → Environment Variables**
+    2. Add `OPENAI_API_KEY` with your API key
+    3. Redeploy to apply the changes
+  </Step>
+</Steps>
 
 <Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
+Vercel automatically builds both the static site (`dist/`) and the serverless API function (`api/chat.js`) based on the `vercel.json` configuration.
+</Note>
+
+## Project Structure
+
+Understanding the architecture will help you navigate and contribute:
+
+```bash
+ai-hackathon-guide/
+├── src/                    # React frontend
+│   ├── App.tsx            # Root layout with sidebar + chat
+│   ├── components/        # UI components (ToolCard, ChatPanel, etc.)
+│   ├── content/
+│   │   └── sections.ts    # All tool data (single source of truth)
+│   └── index.css          # Theme colors and Tailwind
+├── shared/
+│   └── chatPolicy.ts      # Chat logic (used by both dev + prod)
+├── server/
+│   └── chat.ts            # Vercel serverless handler
+├── api/
+│   └── chat.js            # Built serverless function (generated)
+├── dist/                  # Production build output (generated)
+└── vercel.json            # Vercel deployment config
+```
+
+### Key Files
+
+<Accordion title="src/content/sections.ts">
+  **Single source of truth for all tool data.**
+
+  Each `Section` contains:
+  - `id`: Unique identifier
+  - `title`: Display name
+  - `tools`: Array of `Tool` objects
+
+  Each `Tool` includes:
+  - Basic info: `name`, `tagline`, `description`, `url`
+  - Features: `bullets` array
+  - Details: `detailsGuide`, `detailsVideo`, `detailsSections`
+
+  Adding a new tool means editing this file—the UI and chat automatically pick it up.
+</Accordion>
+
+<Accordion title="shared/chatPolicy.ts">
+  **All chat logic in one place.**
+
+  Handles:
+  - Message sanitization
+  - System prompts
+  - OpenAI API calls
+  - Stack suggestion mode (structured JSON)
+  - Tool ranking and filtering
+
+  Used identically in:
+  - Development (via Vite middleware in `vite.config.ts`)
+  - Production (via `server/chat.ts` serverless function)
+</Accordion>
+
+<Accordion title="server/chat.ts">
+  **Thin Vercel serverless handler.**
+
+  Delegates all logic to `shared/chatPolicy.ts`. Built to `api/chat.js` using esbuild:
+
+  ```bash
+  npm run build:api
+  ```
+</Accordion>
+
+## Next Steps
+
+Now that you're set up, explore the guide:
+
+<CardGroup cols={2}>
+  <Card
+    title="Explore Development Tools"
+    icon="code"
+    href="/tools/development/cursor"
+  >
+    Check out Cursor, Codex, Replit, and other AI-powered editors
+  </Card>
+  <Card
+    title="Browse Databases & Auth"
+    icon="grid"
+    href="/tools/databases/supabase"
+  >
+    See all databases, auth services, deployment platforms, and APIs
+  </Card>
+  <Card
+    title="AI Chat Features"
+    icon="book"
+    href="/features/ai-chat"
+  >
+    Learn about the AI chat assistant and tech stack recommendations
+  </Card>
+  <Card
+    title="Contribute"
+    icon="code-branch"
+    href="/development/contributing"
+  >
+    Add new tools, fix bugs, or improve documentation
+  </Card>
+</CardGroup>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Chat returns API errors" icon="triangle-exclamation">
+    **Possible causes:**
+
+    1. **Missing API key**: Verify `OPENAI_API_KEY` is set in `.env` or environment
+    2. **Invalid API key**: Check that your key is correct at [platform.openai.com](https://platform.openai.com)
+    3. **No credits**: Ensure your OpenAI account has available credits
+    4. **Rate limiting**: Free tier has usage limits; wait or upgrade
+
+    **Check the browser console** for detailed error messages.
+  </Accordion>
+
+  <Accordion title="Port already in use" icon="network-wired">
+    If port 5173 is taken:
+
+    ```bash
+    # Kill the process using the port
+    lsof -ti:5173 | xargs kill -9
+
+    # Or let Vite choose another port
+    npm run dev -- --port 3000
+    ```
+  </Accordion>
+
+  <Accordion title="Tests failing" icon="vial">
+    Common issues:
+
+    1. **Outdated dependencies**: Run `npm install`
+    2. **TypeScript errors**: Run `npm run build` to see type errors
+    3. **Coverage threshold**: The project requires 80% coverage (configured in Vitest)
+
+    View the coverage report:
+
+    ```bash
+    npm run test:coverage
+    open coverage/index.html
+    ```
+  </Accordion>
+
+  <Accordion title="Deployment issues on Vercel" icon="cloud">
+    **Build fails:**
+
+    - Verify `vercel.json` is present
+    - Check build logs for TypeScript or dependency errors
+
+    **Chat doesn't work in production:**
+
+    - Ensure `OPENAI_API_KEY` is set in Vercel environment variables
+    - Redeploy after adding env vars
+    - Check Function logs in Vercel dashboard
+  </Accordion>
+</AccordionGroup>
+
+<Note>
+For additional help, check the [GitHub Issues](https://github.com/ayomidecole/AI-Hackathon-Guide/issues) or ask in the AI chat assistant using the deployed site at [deepwiki.com](https://deepwiki.com/ayomidecole/AI-Hackathon-Guide).
 </Note>

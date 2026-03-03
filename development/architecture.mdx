@@ -1,0 +1,277 @@
+---
+title: Architecture
+description: Understanding the AI Hackathon Guide's three-layer architecture, content model, and component structure
+---
+
+## Overview
+
+AI Hackathon Guide is a React + TypeScript single-page application that showcases curated developer tools for AI hackathons. It includes an AI chat assistant powered by OpenAI that helps users find tools, compare options, and get a recommended tech stack.
+
+Deployed on Vercel, the frontend is a Vite-built React SPA; the backend is a single serverless function for chat.
+
+## Three-Layer Architecture
+
+The project is organized into three distinct layers:
+
+<Tabs>
+  <Tab title="Client (src/)">
+    **React frontend** built with:
+    - Vite + React 19
+    - Tailwind v4
+    - TypeScript
+
+    Contains all UI components, styles, and client-side logic.
+
+    Key components:
+    - `App.tsx` - Root layout and state management
+    - `components/` - Reusable UI components
+    - `content/sections.ts` - Tool and section data
+  </Tab>
+  <Tab title="Shared (shared/)">
+    **`shared/chatPolicy.ts`** contains all chat logic:
+    - Message sanitization
+    - System prompts
+    - OpenAI API calls
+    - Suggest-stack structured JSON flow
+    - Tool ranking
+
+    Imported by both:
+    - Dev middleware (Vite)
+    - Production serverless function
+
+    This shared module pattern means chat behavior changes only need to happen in one place.
+  </Tab>
+  <Tab title="Server (server/)">
+    **`server/chat.ts`** is a thin Vercel serverless handler that delegates to `shared/chatPolicy.ts`.
+
+    Built to `api/chat.js` via esbuild:
+    ```typescript
+    import type { VercelRequest, VercelResponse } from '@vercel/node'
+    import { handleChatRequest, type ChatRequestBody } from '../shared/chatPolicy'
+
+    export default async function handler(
+      req: VercelRequest,
+      res: VercelResponse
+    ): Promise<void> {
+      if (req.method !== 'POST') {
+        res.status(405).json({ error: 'Method not allowed' })
+        return
+      }
+
+      const result = await handleChatRequest(
+        process.env.OPENAI_API_KEY,
+        req.body as ChatRequestBody
+      )
+
+      res.status(result.status).json(result.json)
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Content Data Model
+
+All tool/section content lives in `src/content/sections.ts`. Each `Section` has an id, title, and array of `Tool` objects.
+
+### Type Definitions
+
+```typescript
+export interface Tool {
+  id: string;
+  name: string;
+  tagline: string;
+  description: string;
+  bullets: string[];
+  url: string;
+  detailsGuide?: { label: string; url: string };
+  detailsVideo?: { title: string; embedUrl: string; watchUrl?: string };
+  detailsSections?: { heading: string; items: string[] }[];
+  imageUrl?: string;
+}
+
+export interface Section {
+  id: string;
+  title: string;
+  tools: Tool[];
+  contributors?: string[];
+}
+```
+
+### Adding Content
+
+Adding a new tool or section means editing `src/content/sections.ts` - the UI and chat ranking pick it up automatically.
+
+## Chat Modes
+
+The chat has two modes controlled by the `mode` field in the request body:
+
+<Tabs>
+  <Tab title="Default Mode">
+    **General Q&A** using `gpt-4o-mini` with a short system prompt:
+
+    ```typescript
+    const DEFAULT_SYSTEM_PROMPT =
+      'You are an assistant for the AI Hackathon Guide. Help users find tools, compare options (e.g. Cursor vs Replit), and get quick tips for building AI apps during hackathons. Be concise and actionable.'
+    ```
+  </Tab>
+  <Tab title="Suggest-Stack Mode">
+    **Structured recommendations** using `gpt-4o` with `response_format: { type: "json_object" }`.
+
+    Returns either:
+    - A clarifying question
+    - A full stack recommendation
+
+    The structured response is parsed and formatted to markdown before being returned. Falls back to local tool ranking if the JSON parse fails.
+
+    Example response structure:
+    ```typescript
+    interface SuggestStackResponse {
+      kind: 'clarification' | 'stack';
+      clarifying_question: string | null;
+      stack: {
+        summary: string;
+        dev_tool: string;
+        core_tools: { name: string; category: string; reason: string }[];
+        optional_later: { name: string; category: string; reason: string }[];
+        setup_note: string;
+      } | null;
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Theming System
+
+Dark/light theme is driven by a `data-theme` attribute on `<html>`.
+
+### CSS Custom Properties
+
+All colors use CSS custom properties defined in `src/index.css`:
+
+```css
+/* Dark theme */
+:root,
+[data-theme='dark'] {
+  --bg-base: #16161e;
+  --bg-panel: rgba(255, 255, 255, 0.04);
+  --text-primary: #f4f4f5;
+  --accent: #d97706;
+  /* ... */
+}
+
+/* Light theme */
+[data-theme='light'] {
+  --bg-base: #ebe0d4;
+  --bg-panel: #e2d6c8;
+  --text-primary: #1c1917;
+  --accent: #b45309;
+  /* ... */
+}
+```
+
+### Using Theme Variables
+
+Components reference these via:
+- Inline `style` props
+- Tailwind arbitrary values like `text-[var(--text-primary)]`
+
+```tsx
+<div className="bg-[var(--bg-base)] text-[var(--text-primary)]">
+  {/* Content */}
+</div>
+```
+
+### Theme Toggle Implementation
+
+```tsx
+const THEME_KEY = 'ai-hackathon-guide-theme';
+type Theme = 'light' | 'dark';
+
+function getInitialTheme(): Theme {
+  const stored = localStorage.getItem(THEME_KEY);
+  if (stored === 'light' || stored === 'dark') return stored;
+  return window.matchMedia('(prefers-color-scheme: light)').matches
+    ? 'light'
+    : 'dark';
+}
+
+useEffect(() => {
+  document.documentElement.setAttribute('data-theme', theme);
+}, [theme]);
+```
+
+## Key UI Components
+
+### App.tsx
+
+Root layout managing:
+- Sidebar (intro + "Suggest a stack" button)
+- Main content area
+- Chat modal
+- Section state and chat state
+
+```tsx
+const [openSectionId, setOpenSectionId] = useState<string | null>('dev-tools');
+const [chatOpen, setChatOpen] = useState(false);
+const [chatOptions, setChatOptions] = useState<{
+  initialInput?: string;
+  mode?: 'suggest-stack';
+  toolContext?: { toolId: string; toolName: string; toolDescription: string };
+}>({});
+```
+
+### ToolCarousel
+
+Carousel with multiple navigation methods:
+- Keyboard (arrow keys)
+- Swipe gestures
+- Dot navigation
+
+Uses a two-phase animation (out → in) with CSS keyframe classes.
+
+### ToolCard
+
+Expandable card showing:
+- Tool details
+- Guide links
+- Embedded YouTube videos
+
+Supports both guide links and video embeds in the details section.
+
+### SectionPanel
+
+Collapsible accordion for each tool category. Manages open/closed state and animates transitions.
+
+### ChatPanel
+
+Modal chat UI that:
+- Posts to `/api/chat`
+- Renders markdown responses
+- Supports both default and suggest-stack modes
+- Handles tool context for contextual questions
+
+## Build Output
+
+The build process produces:
+
+<CodeGroup>
+```bash dist/ - Static SPA assets
+dist/
+├── index.html
+├── assets/
+│   ├── index-[hash].js
+│   └── index-[hash].css
+└── ...
+```
+
+```bash api/ - Serverless function
+api/
+└── chat.js  # esbuild from server/chat.ts
+```
+</CodeGroup>
+
+### Routing
+
+Configured in `vercel.json`:
+- `/api/*` → serverless functions
+- Everything else → `index.html` (client-side routing)

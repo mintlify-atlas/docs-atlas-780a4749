@@ -1,0 +1,46 @@
+---
+title: "Cursor"
+description: "AI-first code editor"
+---
+
+# Cursor
+
+Built to make you extraordinarily productive, Cursor is the best way to code with AI.
+
+## Key features
+
+- Pair programming
+- Inline edits
+- Agent mode
+
+## Getting started
+
+<Card title="Official documentation" icon="book" href="https://cursor.com/blog/agent-best-practices">
+  Best practices for coding with agents
+</Card>
+
+<Card title="Video tutorial" icon="play" href="https://youtu.be/WVeYLlKOWc0?si=fo3YBV_dynf_HuXj">
+  Watch: Cursor walkthrough
+</Card>
+
+## Tips and best practices
+
+<Accordion title="Start with plans">
+  - Use Plan Mode (Shift+Tab): the agent researches your codebase, asks clarifying questions, and creates a plan before writing code.
+  - If the agent goes off track, revert and refine the plan instead of fixing via follow-ups—often faster and cleaner.
+</Accordion>
+
+<Accordion title="Context">
+  - Let the agent find context; you don't need to tag every file. Use @Branch for "what am I working on?" and @Past Chats to reference previous conversations.
+  - Start a new conversation when switching tasks or when the agent loses focus; long threads add noise.
+</Accordion>
+
+<Accordion title="Rules & skills">
+  - Rules (.cursor/rules/): always-on context (commands, code style, workflow). Keep them short; reference files instead of copying them.
+  - Skills (SKILL.md): custom commands, hooks, and domain knowledge the agent loads when relevant.
+</Accordion>
+
+<Accordion title="Workflows">
+  - TDD: ask for tests → run and confirm they fail → commit → ask for implementation that passes → iterate until green.
+  - Use /commands for repeatable workflows (e.g. /pr, /review). Store in .cursor/commands/ and commit to git.
+</Accordion>

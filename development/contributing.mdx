@@ -1,0 +1,400 @@
+---
+title: Contributing
+description: Guidelines for contributing code, ideas, and bug reports to AI Hackathon Guide
+---
+
+## Welcome Contributors
+
+We welcome all kinds of contributions to the AI Hackathon Guide! Whether you want to contribute code, suggest new tools, report bugs, or improve documentation, your help makes this guide better for everyone.
+
+## Code Contributions
+
+### 1. Create a Branch
+
+Create a new branch for your development work:
+
+```bash
+git checkout -b feature/your-feature-name
+```
+
+Branch naming conventions:
+- `feature/` - New features or enhancements
+- `fix/` - Bug fixes
+- `docs/` - Documentation updates
+- `refactor/` - Code refactoring
+
+### 2. Make Your Changes
+
+When contributing code:
+
+<Steps>
+  <Step title="Follow existing patterns">
+    Look at existing code for style and structure guidance. The project uses:
+    - TypeScript for type safety
+    - React 19 with functional components and hooks
+    - Tailwind v4 for styling
+  </Step>
+  <Step title="Write tests">
+    Write or extend tests for every new or changed behavior:
+    - Unit tests for shared/server logic
+    - Component tests for UI
+
+    See the [Testing](/development/testing) guide for details.
+  </Step>
+  <Step title="Document your code">
+    Ensure your code is well-documented:
+    - Add JSDoc comments for complex functions
+    - Update relevant documentation files
+    - Add inline comments for non-obvious logic
+  </Step>
+  <Step title="Test locally">
+    Before submitting, test your changes:
+
+    ```bash
+    # Run tests
+    npm run test:run
+
+    # Check coverage
+    npm run test:coverage
+
+    # Run linter
+    npm run lint
+
+    # Test the build
+    npm run build
+    ```
+  </Step>
+</Steps>
+
+### 3. Open a Pull Request
+
+When you're ready:
+
+1. Push your branch to GitHub:
+   ```bash
+   git push origin feature/your-feature-name
+   ```
+
+2. Open a Pull Request (PR) on GitHub
+
+3. Fill out the PR template with:
+   - Description of changes
+   - Motivation and context
+   - Testing performed
+   - Screenshots (if UI changes)
+
+4. Request review from core contributors
+
+### PR Review Process
+
+Your PR will be reviewed by core contributors who will:
+- Check code quality and style
+- Verify tests pass and coverage meets thresholds
+- Test functionality locally
+- Suggest improvements or request changes
+
+Once approved, your PR will be merged!
+
+## Types of Contributions
+
+<Tabs>
+  <Tab title="Adding Tools">
+    To add a new tool to the guide:
+
+    1. Edit `src/content/sections.ts`
+    2. Add your tool to the appropriate section:
+
+    ```typescript
+    {
+      id: 'your-tool-id',
+      name: 'Tool Name',
+      tagline: 'Brief tagline',
+      description: 'Detailed description',
+      bullets: [
+        'Key feature 1',
+        'Key feature 2',
+        'Key feature 3'
+      ],
+      url: 'https://tool-website.com',
+      detailsGuide: {
+        label: 'Getting started guide',
+        url: 'https://docs.tool-website.com'
+      },
+      detailsVideo: {
+        title: 'Watch: Tool walkthrough',
+        embedUrl: 'https://www.youtube.com/embed/VIDEO_ID',
+        watchUrl: 'https://www.youtube.com/watch?v=VIDEO_ID'
+      },
+      detailsSections: [
+        {
+          heading: 'Section heading',
+          items: [
+            'Detail point 1',
+            'Detail point 2'
+          ]
+        }
+      ]
+    }
+    ```
+
+    3. Test that the tool appears correctly in the UI and chat
+  </Tab>
+  <Tab title="Improving UI">
+    UI improvements might include:
+    - New components
+    - Enhanced animations
+    - Accessibility improvements
+    - Responsive design fixes
+    - Theme enhancements
+
+    When working on UI:
+    - Test in both light and dark themes
+    - Test on mobile and desktop
+    - Ensure accessibility (keyboard nav, screen readers)
+    - Add component tests
+  </Tab>
+  <Tab title="Enhancing Chat">
+    Chat improvements live in `shared/chatPolicy.ts`:
+    - Improve tool ranking algorithm
+    - Enhance system prompts
+    - Add new chat modes
+    - Improve error handling
+
+    Test chat changes:
+    - Unit test the logic
+    - Test in dev mode (`npm run dev`)
+    - Test edge cases (empty input, long conversations)
+  </Tab>
+  <Tab title="Documentation">
+    Documentation improvements:
+    - Fix typos or unclear sections
+    - Add examples
+    - Improve guides
+    - Add missing documentation
+
+    Documentation lives in:
+    - This docs site (separate repo if applicable)
+    - Code comments
+    - README.md
+  </Tab>
+</Tabs>
+
+## Ideas & Bug Reports
+
+Don't want to contribute code but have ideas or found bugs?
+
+### Submitting Issues
+
+<Steps>
+  <Step title="Search existing issues">
+    Check if your issue already exists in the [GitHub Issues](https://github.com/ayomidecole/AI-Hackathon-Guide/issues)
+  </Step>
+  <Step title="Create a new issue">
+    If not found, create a new issue with:
+    - Clear, descriptive title
+    - Detailed description
+    - Steps to reproduce (for bugs)
+    - Expected vs actual behavior
+    - Screenshots or videos if applicable
+  </Step>
+  <Step title="Engage with feedback">
+    Respond to questions or requests for clarification from maintainers
+  </Step>
+</Steps>
+
+### Issue Templates
+
+<Tabs>
+  <Tab title="Bug Report">
+    ```markdown
+    **Describe the bug**
+    A clear description of what the bug is.
+
+    **To Reproduce**
+    Steps to reproduce:
+    1. Go to '...'
+    2. Click on '...'
+    3. See error
+
+    **Expected behavior**
+    What you expected to happen.
+
+    **Screenshots**
+    Add screenshots if applicable.
+
+    **Environment**
+    - Browser: [e.g. Chrome 120]
+    - OS: [e.g. macOS 14]
+    - Node version: [e.g. 20.x]
+    ```
+  </Tab>
+  <Tab title="Feature Request">
+    ```markdown
+    **Is your feature related to a problem?**
+    Describe the problem or limitation.
+
+    **Describe the solution**
+    What you'd like to see implemented.
+
+    **Alternatives considered**
+    Other approaches you've thought about.
+
+    **Additional context**
+    Mockups, examples, or other details.
+    ```
+  </Tab>
+  <Tab title="New Tool Suggestion">
+    ```markdown
+    **Tool name**
+    Name of the tool
+
+    **Tool URL**
+    https://tool-website.com
+
+    **Category**
+    Which section: Development, Database, Auth, Deployment, etc.
+
+    **Why add this tool?**
+    What makes it valuable for hackathons?
+
+    **Key features**
+    - Feature 1
+    - Feature 2
+    - Feature 3
+    ```
+  </Tab>
+</Tabs>
+
+## Development Setup
+
+### Prerequisites
+
+- Node.js 20.x or later
+- npm or yarn
+- Git
+- OpenAI API key (for chat features)
+
+### Initial Setup
+
+```bash
+# Clone the repository
+git clone https://github.com/ayomidecole/AI-Hackathon-Guide.git
+cd AI-Hackathon-Guide
+
+# Install dependencies
+npm install
+
+# Set up environment variables
+cp .env.example .env
+# Edit .env and add your OPENAI_API_KEY
+
+# Start development server
+npm run dev
+```
+
+The app will be available at `http://localhost:5173`
+
+### Available Commands
+
+<CodeGroup>
+```bash Development
+npm run dev
+```
+
+```bash Build
+npm run build
+```
+
+```bash Lint
+npm run lint
+```
+
+```bash Test
+npm run test
+```
+
+```bash Preview production build
+npm run preview
+```
+</CodeGroup>
+
+See [Architecture](/development/architecture) for details on the build process.
+
+## Code Style
+
+### TypeScript
+
+- Use TypeScript for all new code
+- Define proper types and interfaces
+- Avoid `any` - use `unknown` if type is truly unknown
+- Use type inference where obvious
+
+```typescript
+// Good
+interface ToolProps {
+  tool: Tool;
+  onSelect: (id: string) => void;
+}
+
+// Avoid
+function handleTool(tool: any) { ... }
+```
+
+### React Components
+
+- Use functional components with hooks
+- Keep components focused and single-purpose
+- Extract reusable logic to custom hooks
+- Use proper prop typing
+
+```typescript
+// Good
+interface CardProps {
+  title: string;
+  children: React.ReactNode;
+}
+
+export function Card({ title, children }: CardProps) {
+  return (
+    <div>
+      <h2>{title}</h2>
+      {children}
+    </div>
+  )
+}
+```
+
+### Styling
+
+- Use Tailwind utility classes
+- Use CSS custom properties for theme values
+- Keep inline styles minimal
+- Use arbitrary values for theme variables: `text-[var(--text-primary)]`
+
+```tsx
+// Good
+<div className="bg-[var(--bg-base)] text-[var(--text-primary)] p-4 rounded-lg">
+  {/* Content */}
+</div>
+
+// Avoid
+<div style={{ backgroundColor: '#16161e', color: '#f4f4f5' }}>
+  {/* Content */}
+</div>
+```
+
+## Community Guidelines
+
+- Be respectful and constructive in discussions
+- Help others who have questions
+- Give credit where it's due
+- Follow the [GitHub Community Guidelines](https://docs.github.com/en/site-policy/github-terms/github-community-guidelines)
+
+## Recognition
+
+Contributors are recognized in:
+- The Contributors section of relevant pages
+- GitHub's contributor graph
+- Release notes for significant contributions
+
+Thank you for making the AI Hackathon Guide better for everyone! 🚀

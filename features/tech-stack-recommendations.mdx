@@ -1,0 +1,325 @@
+---
+title: Tech Stack Recommendations
+description: Get personalized tech stack recommendations based on your project idea using the suggest-stack AI mode
+---
+
+The suggest-stack feature is a specialized chat mode that recommends a minimal tech stack tailored to your project idea. It's designed specifically for "vibe coders" who use AI coding agents rather than writing code directly.
+
+## Overview
+
+Unlike the default chat mode, suggest-stack:
+
+- Asks clarifying questions about your project requirements
+- Analyzes what you actually need (auth, database, APIs, deployment, etc.)
+- Recommends a minimal stack from the guide's curated tools
+- Prioritizes planning-centric AI development tools
+- Returns structured recommendations with reasoning
+
+## How It Works
+
+### The Suggest-Stack Flow
+
+1. **User describes their idea** - e.g., "I want to build a real-time chat app"
+2. **AI asks clarifying questions** - About auth, data persistence, APIs, deployment needs
+3. **AI recommends a stack** - Minimal set of tools with explanations
+4. **User can ask follow-ups** - Refine the recommendation or ask about alternatives
+
+### Structured JSON Response
+
+Unlike default chat, suggest-stack uses OpenAI's structured output (`response_format: { type: "json_object" }`) to return one of two response types:
+
+#### Clarification Response
+
+```json
+{
+  "kind": "clarification",
+  "clarifying_question": "Do users need to log in and save their data, or is this a single-user tool?",
+  "stack": null
+}
+```
+
+#### Stack Recommendation Response
+
+```json
+{
+  "kind": "stack",
+  "clarifying_question": null,
+  "stack": {
+    "summary": "Real-time chat with user accounts and message history",
+    "dev_tool": "Cursor (Plan Mode)",
+    "core_tools": [
+      {
+        "name": "Supabase",
+        "category": "database",
+        "reason": "Real-time subscriptions and auth built-in for chat features"
+      },
+      {
+        "name": "Vercel",
+        "category": "deployment",
+        "reason": "Deploy instantly from your AI agent's git commits"
+      }
+    ],
+    "optional_later": [
+      {
+        "name": "OpenAI API",
+        "category": "api",
+        "reason": "Add AI-powered message suggestions or moderation"
+      }
+    ],
+    "setup_note": "Open Cursor, describe your chat app, and ask it to scaffold a Next.js + Supabase project. Use Supabase dashboard to configure auth."
+  }
+}
+```
+
+## Using Suggest-Stack
+
+### Accessing the Feature
+
+Click the "Suggest a stack" button in the sidebar to open the chat in suggest-stack mode.
+
+### Example Conversations
+
+<CodeGroup>
+```text Simple Idea
+User: I want to build a todo app
+
+AI: Do users need to log in and save their todos, or is this just for you?
+
+User: Just for me, no login needed
+
+AI: Keep the first version lean. Start with Cursor (Plan Mode).
+- Start with a planning tool: use Cursor to outline your todo app structure before coding
+- Vercel (deployment): Deploy instantly when ready
+- Later if needed: Add Supabase for cloud sync across devices
+- To get started: Open Cursor and ask it to create a simple todo app with local storage
+```
+
+```text Complex Project
+User: A marketplace for AI-generated art
+
+AI: A few quick questions:
+1. Do artists need accounts, or can anyone upload?
+2. Will you handle payments?
+3. Do you need AI image generation, or just hosting existing AI art?
+
+User: Artists need accounts, yes to payments, just hosting existing art
+
+AI: Multi-user marketplace with payments and auth.
+- Start with a planning tool: Cursor (Plan Mode) to build the full marketplace flow
+- Clerk (auth): Artist accounts and authentication via dashboard config
+- Stripe (api): Payment processing with no custom payment code
+- Supabase (database): Store artwork listings and artist profiles
+- Vercel (deployment): Deploy your marketplace
+- To get started: Open Cursor, ask it to scaffold a Next.js marketplace with Clerk auth and Stripe checkout
+```
+</CodeGroup>
+
+## The System Prompt
+
+Suggest-stack uses a specialized system prompt that defines its behavior (`shared/chatPolicy.ts:148-187`):
+
+### Key Principles
+
+1. **Vibe Coder Focus** - Assumes users won't read or write code directly
+2. **Planning-Centric Tools** - Defaults to AI tools with plan mode (Cursor, Claude Code)
+3. **Minimal Stack** - Recommends only what's needed: 1 dev tool + a few core tools
+4. **Dashboard-First** - Instructions use dashboards and agent commands, never "write code"
+
+### Dev Tool Guidance
+
+From `shared/chatPolicy.ts:160-164`:
+
+```typescript
+'- Prefer planning-centric AI coding tools such as Cursor (Plan Mode), Claude Code, or Codex-style web agents.'
+'- Default to these planning tools when in doubt, so the user builds a planning habit.'
+'- Only choose a different dev tool when the user clearly wants something else (for example a no-/low-code visual builder).'
+'- Never recommend bare frameworks such as "use React" or "use Spring Boot" as the primary dev_tool.'
+```
+
+### Tool Selection Logic
+
+The system prompt includes a list of all available guide tools (`shared/chatPolicy.ts:138-146`):
+
+```typescript
+function getSuggestStackToolList(): GuideToolSummary[] {
+  return sections.flatMap((section) =>
+    section.tools.map((tool) => ({
+      name: tool.name,
+      category: getSectionCategory(section.title),
+      tagline: tool.tagline,
+    }))
+  )
+}
+```
+
+This ensures recommendations only include tools actually documented in the guide.
+
+## Response Formatting
+
+When a stack recommendation is returned, it's converted to markdown (`shared/chatPolicy.ts:272-287`):
+
+```typescript
+function formatSuggestStackMarkdown(stack: SuggestStackStack): string {
+  const lines: string[] = [stack.summary, '']
+  lines.push(
+    '- Start with a planning tool: Cursor (local repo & deep code work), ' +
+    'Claude Code (browser-based multi-file editing), Codex web (fast experiments). ' +
+    `For you, **${stack.dev_tool}** is a good default choice.`
+  )
+  for (const t of stack.core_tools) {
+    lines.push(`- **${t.name}** (${t.category}): ${t.reason}`)
+  }
+  if (stack.optional_later.length > 0) {
+    const later = stack.optional_later.map((t) => `${t.name} for ${t.reason}`).join('; ')
+    lines.push(`- Later if needed: ${later}`)
+  }
+  lines.push(`- To get started: ${stack.setup_note}`)
+  return lines.join('\n')
+}
+```
+
+This creates a consistent, scannable format:
+
+- Summary of the project
+- Dev tool recommendation with context
+- Core tools with category and reason
+- Optional tools for later
+- Setup instructions
+
+## Fallback Behavior
+
+If the OpenAI response can't be parsed as valid JSON, suggest-stack falls back to local tool ranking (`shared/chatPolicy.ts:289-305`):
+
+```typescript
+function buildSuggestStackFallbackResponse(latestUserMessage: string): string {
+  const ranked = rankGuideToolsByQuery(latestUserMessage, 5)
+  const devTool = ranked.find((t) => t.category === 'development') ?? ranked[0]
+  if (!devTool) {
+    return [
+      'Start with your preferred AI dev tool and ask it to build a minimal version of your idea.',
+      '- Open Cursor, Codex, or Replit and describe what you want to build.',
+      '- Keep the first version to one core flow; add more after it works.',
+    ].join('\n')
+  }
+  return [
+    `Keep the first version lean. Start with **${devTool.name}** – ${devTool.tagline}.`,
+    `- Open ${devTool.name} and ask it to build a minimal version of your idea.`,
+    '- Use the agent for everything; no need to write code yourself.',
+    '- Add a database or auth later only if you need saved data or user accounts.',
+  ].join('\n')
+}
+```
+
+This ensures users always get a helpful response, even if the structured AI output fails.
+
+## Tool Ranking
+
+The fallback uses a simple token-based ranking system (`shared/chatPolicy.ts:194-229`):
+
+```typescript
+export function rankGuideToolsByQuery(query: string, limit = 20): GuideTool[] {
+  const queryNormalized = normalizeText(query)
+  const queryTokens = tokenize(query)
+
+  const scored = GUIDE_TOOLS.map((tool, index) => {
+    let score = 0
+
+    // Exact name match
+    if (queryNormalized.includes(tool.normalizedName)) {
+      score += 10
+    }
+
+    // Token matches in name
+    for (const token of queryTokens) {
+      if (tool.normalizedName.includes(token)) {
+        score += 3
+      }
+      // Token matches in search text (description, bullets, etc.)
+      if (tool.searchText.includes(token)) {
+        score += 1
+      }
+    }
+
+    return { tool, score, index }
+  })
+
+  // Sort by score, then by original index
+  const ranked = scored.sort((a, b) => {
+    if (b.score !== a.score) return b.score - a.score
+    return a.index - b.index
+  }).map((entry) => entry.tool)
+
+  return ranked.slice(0, limit)
+}
+```
+
+## Setup Requirements
+
+Suggest-stack has the same setup requirements as the default chat:
+
+<Steps>
+  <Step title="OpenAI API Key">
+    You need an OpenAI API key with access to GPT-4 models. Create one at [platform.openai.com/api-keys](https://platform.openai.com/api-keys).
+  </Step>
+  
+  <Step title="Configure Environment Variable">
+    Set `OPENAI_API_KEY` in your `.env` file or Vercel environment variables:
+    
+    ```bash
+    OPENAI_API_KEY="your_api_key_here"
+    ```
+  </Step>
+  
+  <Step title="Verify Setup">
+    Click "Suggest a stack" in the sidebar and describe a project idea. You should receive either a clarifying question or a stack recommendation.
+  </Step>
+</Steps>
+
+<Note>
+  Suggest-stack uses GPT-5.2 which may have higher API costs than the default chat mode. Monitor your OpenAI usage if you're on a tight budget.
+</Note>
+
+## API Usage
+
+### Request Format
+
+To use suggest-stack mode programmatically:
+
+```typescript
+POST /api/chat
+Content-Type: application/json
+
+{
+  "messages": [
+    { "role": "user", "content": "I want to build a recipe sharing app" }
+  ],
+  "mode": "suggest-stack"
+}
+```
+
+### Response Format
+
+The response follows the standard chat completion format but with markdown-formatted stack recommendations:
+
+```json
+{
+  "id": "chatcmpl-clarify",
+  "object": "chat.completion",
+  "created": 1234567890,
+  "model": "gpt-5.2",
+  "choices": [
+    {
+      "index": 0,
+      "finish_reason": "stop",
+      "message": {
+        "role": "assistant",
+        "content": "Do users need accounts to share recipes, or is it a public feed anyone can post to?"
+      }
+    }
+  ]
+}
+```
+
+## Related
+
+- [AI Chat Assistant](/features/ai-chat) - Learn about the default chat mode

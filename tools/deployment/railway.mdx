@@ -1,0 +1,57 @@
+---
+title: Railway
+description: Simple app hosting
+---
+
+# Railway
+
+**Simple app hosting**
+
+Railway is an infrastructure platform where you can provision infrastructure, develop with that infrastructure locally, and then deploy to the cloud.
+
+## Key Features
+
+- Zero config
+- Cron jobs
+- Database provisioning
+
+## Deploy
+
+<Steps>
+  <Step title="Connect your repository">
+    Connect a repo or use `railway up`; Railway auto-detects frameworks (Node, Python, etc.).
+  </Step>
+  
+  <Step title="Add services">
+    Add Postgres, Redis, or other services with one click; connection strings are injected automatically.
+  </Step>
+</Steps>
+
+## Cron & background
+
+<Accordion title="Cron jobs">
+  Use cron jobs for scheduled tasks; define in `railway.json` or via the dashboard.
+</Accordion>
+
+<Accordion title="Workers and scaling">
+  Run workers and APIs in the same project; scale by adding more instances.
+</Accordion>
+
+## Hackathon tips
+
+- Free tier ($5 credit) is enough for demos; upgrade if you need more resources.
+- Database provisioning is fast—add Postgres in seconds and connect with one env var.
+
+## Resources
+
+<Card title="Railway docs" icon="book" href="https://docs.railway.app/">
+  Official Railway documentation
+</Card>
+
+<Card title="Watch: Railway beginner deploy flow (community)" icon="play" href="https://www.youtube.com/watch?v=1sUWXpkxpq8">
+  Community tutorial on Railway deployment
+</Card>
+
+<Card title="Visit Railway" icon="link" href="https://railway.app">
+  Official website
+</Card>

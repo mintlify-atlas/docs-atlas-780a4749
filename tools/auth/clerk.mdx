@@ -1,0 +1,83 @@
+---
+title: Clerk
+description: User management for modern apps
+---
+
+# Clerk
+
+**User management for modern apps**
+
+Drop-in components and APIs for authentication, user management, and session handling. Built for React and Next.js with a generous free tier.
+
+## Key Features
+
+- Pre-built components
+- Next.js & React
+- Free tier
+
+## Quick Setup
+
+<Steps>
+  <Step title="Install Clerk">
+    <CodeGroup>
+    ```bash npm
+    npm install @clerk/nextjs
+    ```
+    
+    ```bash yarn
+    yarn add @clerk/nextjs
+    ```
+    
+    ```bash pnpm
+    pnpm add @clerk/nextjs
+    ```
+    </CodeGroup>
+  </Step>
+  
+  <Step title="Add environment variables">
+    Add env vars (NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY, CLERK_SECRET_KEY) to your `.env.local` file.
+  </Step>
+  
+  <Step title="Wrap your app">
+    Wrap your app in ClerkProvider.
+  </Step>
+  
+  <Step title="Add authentication components">
+    Use `<SignIn />` and `<SignUp />` for pre-built modals, or `<UserButton />` for profile dropdown.
+  </Step>
+</Steps>
+
+## Protecting routes
+
+<Accordion title="Middleware protection">
+  Use middleware to protect routes:
+  
+  ```typescript
+  export default clerkMiddleware((auth, req) => {
+    // Your protection logic
+  });
+  ```
+</Accordion>
+
+<Accordion title="Get current user">
+  Get the current user with `auth()` in server components or `useUser()` in client components.
+</Accordion>
+
+## Hackathon tips
+
+- Social logins (Google, GitHub) work out of the box—fast for demos.
+- Free tier is generous; no credit card needed for most hackathon projects.
+
+## Resources
+
+<Card title="Clerk quickstart" icon="book" href="https://clerk.com/docs/quickstarts/nextjs">
+  Official Next.js quickstart guide
+</Card>
+
+<Card title="Watch: Clerk official setup walkthrough" icon="play" href="https://www.youtube.com/watch?v=fsuHLafTYyg">
+  Official video walkthrough
+</Card>
+
+<Card title="Visit Clerk" icon="link" href="https://clerk.com">
+  Official website
+</Card>
