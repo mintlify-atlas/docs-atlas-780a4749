@@ -1,0 +1,99 @@
+{
+  "projectType": "saas",
+  "projectName": "AI Hackathon Guide",
+  "projectDescription": "A curated platform showcasing developer tools, resources, and AI-powered recommendations to help hackathon participants build projects faster.",
+  "theme": "almond",
+  "primaryColor": "#7C3AED",
+  "lightColor": "#A78BFA",
+  "darkColor": "#5B21B6",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Guide",
+        "groups": [
+          {
+            "group": "Getting Started",
+            "pages": [
+              "introduction",
+              "quickstart"
+            ]
+          },
+          {
+            "group": "Development Tools",
+            "pages": [
+              "tools/development/cursor",
+              "tools/development/codex",
+              "tools/development/replit",
+              "tools/development/claude-code",
+              "tools/development/lovable"
+            ]
+          },
+          {
+            "group": "Databases",
+            "pages": [
+              "tools/databases/supabase"
+            ]
+          },
+          {
+            "group": "Authentication",
+            "pages": [
+              "tools/auth/clerk",
+              "tools/auth/auth0",
+              "tools/auth/nextauth"
+            ]
+          },
+          {
+            "group": "Deployment",
+            "pages": [
+              "tools/deployment/netlify",
+              "tools/deployment/vercel",
+              "tools/deployment/railway"
+            ]
+          },
+          {
+            "group": "Terminal & APIs",
+            "pages": [
+              "tools/terminal/warp",
+              "tools/apis/openai"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Features",
+        "groups": [
+          {
+            "group": "Platform Features",
+            "pages": [
+              "features/ai-chat",
+              "features/tech-stack-recommendations"
+            ]
+          },
+          {
+            "group": "Development",
+            "pages": [
+              "development/architecture",
+              "development/testing",
+              "development/contributing"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "AI-powered chat assistant for tool discovery and recommendations",
+    "Curated catalog of developer tools across 6 categories",
+    "Tech stack recommendation engine with structured outputs",
+    "Interactive tool cards with guides, videos, and best practices",
+    "Dark/light theme support with custom CSS properties",
+    "Real-time chat with OpenAI GPT-4 integration"
+  ],
+  "publicApiSurface": [
+    "POST /api/chat - Chat completions endpoint (default mode)",
+    "POST /api/chat - Tech stack suggestions (suggest-stack mode)",
+    "sections[] - Tool catalog data model (Section, Tool interfaces)",
+    "React components: App, ChatPanel, ToolCard, ToolCarousel, SectionPanel",
+    "Theme system: data-theme attribute with CSS custom properties"
+  ]
+}
